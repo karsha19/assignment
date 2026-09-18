@@ -44,6 +44,8 @@ class Settings(BaseSettings):
             # (no scheme). Accept that form and assume HTTPS, since every
             # Render web service is served over TLS.
             if not o.startswith("http://") and not o.startswith("https://"):
+                if "." not in o:
+                    o = f"{o}.onrender.com"
                 o = f"https://{o}"
             origins.append(o)
         return origins
