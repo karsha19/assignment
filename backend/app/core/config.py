@@ -6,10 +6,6 @@ class Settings(BaseSettings):
     APP_NAME: str = "okDriver CCTV Platform"
     ENV: str = "development"
 
-    # Preferred: a full SQLAlchemy URL. If not set, it is built from the
-    # MYSQL_* parts below -- this lets a platform like Render inject host
-    # and port from a separate database service without needing string
-    # interpolation in its blueprint config.
     DATABASE_URL: Optional[str] = None
     MYSQL_HOST: str = "mysql"
     MYSQL_PORT: str = "3306"
@@ -40,9 +36,6 @@ class Settings(BaseSettings):
             o = o.strip()
             if not o:
                 continue
-            # Render's fromService "host" property returns a bare hostname
-            # (no scheme). Accept that form and assume HTTPS, since every
-            # Render web service is served over TLS.
             if not o.startswith("http://") and not o.startswith("https://"):
                 if "." not in o:
                     o = f"{o}.onrender.com"

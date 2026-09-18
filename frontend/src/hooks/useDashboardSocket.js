@@ -3,11 +3,6 @@ import { useEffect, useRef } from 'react'
 const WS_BASE_URL =
   window.__ENV__?.WS_BASE_URL || import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000'
 
-/**
- * Connects to the backend dashboard WebSocket and invokes onMessage for
- * every broadcast event. Automatically reconnects with backoff if the
- * connection drops (network blip, backend restart, etc).
- */
 export function useDashboardSocket(token, onMessage) {
   const onMessageRef = useRef(onMessage)
   onMessageRef.current = onMessage
@@ -27,7 +22,6 @@ export function useDashboardSocket(token, onMessage) {
           const parsed = JSON.parse(event.data)
           onMessageRef.current?.(parsed)
         } catch (e) {
-          // ignore malformed frames
         }
       }
 

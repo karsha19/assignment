@@ -27,7 +27,6 @@ def movement_history(identifier: str, db: Session = Depends(get_db), current_use
     for e in events:
         camera = db.query(Camera).filter(Camera.id == e.camera_id).first()
         if not camera or camera.latitude is None or camera.longitude is None:
-            # Skip events whose camera location is missing rather than inventing coordinates
             continue
         movement_events.append(
             MovementEvent(

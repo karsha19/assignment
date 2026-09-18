@@ -1,8 +1,5 @@
 import axios from 'axios'
 
-// Runtime config (window.__ENV__) takes precedence over the Vite build-time
-// env var, so the same built image can be pointed at a different backend
-// on Render without rebuilding. See public/env.js and docker-entrypoint.sh.
 const API_BASE_URL =
   window.__ENV__?.API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 

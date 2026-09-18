@@ -6,9 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Use SQLite for fast, isolated test runs. The application code is
-# database-agnostic through SQLAlchemy; MySQL is used in the real deployment
-# (see docker-compose.yml), SQLite here only for test speed/isolation.
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 from app.db.session import Base

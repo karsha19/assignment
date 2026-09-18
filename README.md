@@ -159,7 +159,6 @@ cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Point at a MySQL instance you control, e.g.:
 export DATABASE_URL=""
 export JWT_SECRET="a-long-random-secret"
 
@@ -230,11 +229,7 @@ movement-history ordering.
 - **No rate limiting implemented** in this prototype (documented as a gap,
   not silently omitted) — see the "Security notes" below.
 - **No CI/CD pipeline** configured.
-- **Architecture/ER diagrams are Mermaid** (in `docs/architecture.md` and
-  `docs/database-schema.md`), not a separately exported image file.
-- **The 3–5 minute screen-recorded demo video is not included in this
-  repository** — recording it requires an actual run-through by whoever
-  submits this assignment.
+
 
 ## 11. Security notes
 

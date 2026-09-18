@@ -3,7 +3,6 @@ from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field, field_validator
 
 
-# ---------- Auth ----------
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -26,7 +25,6 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
-# ---------- Camera ----------
 class CameraBase(BaseModel):
     camera_code: str = Field(..., min_length=1, max_length=32)
     name: str = Field(..., min_length=1, max_length=128)
@@ -85,7 +83,6 @@ class CameraOut(BaseModel):
         from_attributes = True
 
 
-# ---------- Analytics events ----------
 class AnalyticsEventCreate(BaseModel):
     idempotency_key: str = Field(..., min_length=1, max_length=128)
     camera_id: str
@@ -120,7 +117,6 @@ class AnalyticsEventOut(BaseModel):
         from_attributes = True
 
 
-# ---------- Watchlist ----------
 class WatchlistCreate(BaseModel):
     entity_type: str
     identifier: str = Field(..., min_length=1, max_length=64)
@@ -161,7 +157,6 @@ class WatchlistOut(BaseModel):
         from_attributes = True
 
 
-# ---------- Alerts ----------
 class AlertOut(BaseModel):
     id: str
     alert_type: str
@@ -179,7 +174,6 @@ class AlertOut(BaseModel):
         from_attributes = True
 
 
-# ---------- Movement history ----------
 class MovementEvent(BaseModel):
     camera_id: str
     camera_name: str
@@ -196,7 +190,6 @@ class MovementHistoryOut(BaseModel):
     events: List[MovementEvent]
 
 
-# ---------- Audit ----------
 class AuditLogOut(BaseModel):
     id: str
     actor_user_id: Optional[str]

@@ -24,18 +24,15 @@ async def ingest_event(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # 1. Camera must exist and be enabled
     camera = db.query(Camera).filter(Camera.id == payload.camera_id).first()
     if not camera:
         raise HTTPException(status_code=422, detail="Unknown camera_id")
     if not camera.is_enabled:
         raise HTTPException(status_code=422, detail="Camera is disabled and cannot report events")
 
-    # 2. ANPR-style events require an entity identifier
     if payload.event_type == "anpr" and not payload.entity_identifier:
         raise HTTPException(status_code=422, detail="entity_identifier is required for anpr events")
 
-    # 3. Idempotency / duplicate check
     existing = db.query(AnalyticsEvent).filter(AnalyticsEvent.idempotency_key == payload.idempotency_key).first()
     if existing:
         raise HTTPException(status_code=409, detail="Duplicate event: idempotency_key already processed")
@@ -75,7 +72,6 @@ async def ingest_event(
         },
     )
 
-    # 4-7. Watchlist correlation, alert generation, broadcast
     alert = None
     if normalized:
         match = (

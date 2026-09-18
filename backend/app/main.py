@@ -40,9 +40,6 @@ app.include_router(entities.router)
 app.include_router(audit.router)
 app.include_router(ws.router)
 
-# Serves recorded/simulated sample footage only (see data/sample/README.md).
-# This is NOT a live streaming endpoint; it is a plain static file server
-# used to demonstrate the recorded-video playback workflow.
 _MEDIA_DIR = "/media/sample"
 if os.path.isdir(_MEDIA_DIR):
     app.mount("/media/sample", StaticFiles(directory=_MEDIA_DIR), name="sample-media")

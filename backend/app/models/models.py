@@ -91,7 +91,7 @@ class Camera(Base):
     longitude = Column(Float, nullable=False)
     camera_type = Column(String(64), nullable=True)
     source_protocol = Column(Enum(SourceProtocolEnum), nullable=False, default=SourceProtocolEnum.recorded)
-    stream_reference = Column(String(512), nullable=True)  # never returned raw with creds
+    stream_reference = Column(String(512), nullable=True)
     status = Column(Enum(CameraStatusEnum), nullable=False, default=CameraStatusEnum.offline, index=True)
     last_heartbeat = Column(DateTime, nullable=True)
     storage_metadata = Column(JSON, nullable=True)

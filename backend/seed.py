@@ -20,7 +20,7 @@ from app.models import models as m
 from app.core.security import hash_password
 from app.services.matching import normalize_identifier
 
-Base.metadata.create_all(bind=engine)  # safety net if migrations weren't run
+Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()
 
@@ -60,7 +60,7 @@ def main():
         longitude=72.5714,
         camera_type="fixed_junction",
         source_protocol=m.SourceProtocolEnum.recorded,
-        stream_reference="/media/sample/c001_traffic_junction.mp4",  # served by the backend's static mount
+        stream_reference="/media/sample/c001_traffic_junction.mp4",
         status=m.CameraStatusEnum.online,
         last_heartbeat=datetime.utcnow(),
         storage_metadata={"retention_days": 30},
@@ -124,16 +124,12 @@ def main():
         db.refresh(ev)
         return ev
 
-    # Movement history across both cameras for the watchlisted plate
     ev1 = add_event(cam1, watchlisted_plate, 2, 0.94)
     ev2 = add_event(cam2, watchlisted_plate, 18, 0.91)
     ev3 = add_event(cam1, watchlisted_plate, 41, 0.88)
 
-    # A non-matching detection (does not create an alert)
     add_event(cam2, normal_plate, 25, 0.90)
 
-    # Generate alerts for the watchlist-matching events (mirrors what the
-    # ingestion API would do; done directly here since this is seed data)
     def ensure_alert(event, status, ack=False, resolve=False):
         existing = db.query(m.Alert).filter(m.Alert.analytics_event_id == event.id).first()
         if existing:

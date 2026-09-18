@@ -17,10 +17,10 @@ from typing import Optional
 
 @dataclass
 class StreamInfo:
-    source_type: str          # "recorded" | "simulated" | "rtsp" | "onvif" | "vendor_api"
+    source_type: str
     is_connected: bool
-    playback_reference: Optional[str]   # URL/path the frontend can play; never raw credentials
-    label: str                          # human-readable label, e.g. "Recorded MP4 (sample)"
+    playback_reference: Optional[str]
+    label: str
 
 
 class CameraSourceAdapter(ABC):

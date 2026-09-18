@@ -1,35 +1,3 @@
-# Render Blueprint for the okDriver CCTV platform - FREE PLAN ONLY.
-#
-# This deploys two services from this one repo, both on Render's free web
-# service tier:
-#   1. okdriver-backend  - FastAPI, built from backend/Dockerfile
-#   2. okdriver-frontend - React app, built from frontend/Dockerfile, served
-#                          with runtime env injection so it can point at the
-#                          backend's Render URL without a rebuild
-#
-# There is NO database service in this file. Render's only free database
-# offering is Postgres (and even that free instance expires after 90 days);
-# it has no free MySQL product, and private services with a persistent disk
-# (the only way to self-host MySQL on Render, as in the previous version of
-# this file) require a paid plan. To stay fully on Render's free plan, point
-# the backend at a MySQL instance hosted somewhere free instead, e.g.:
-#   - Aiven (free trial MySQL)
-#   - db4free.net
-#   - freesqldatabase.com
-#   - a MySQL instance you already run elsewhere
-#
-# Usage:
-#   1. Set up a free MySQL instance with one of the options above (or your
-#      own) and note its host, port, username, password, and database name.
-#   2. In the Render dashboard, "New +" -> "Blueprint", point it at this
-#      repo. Render reads this file and creates both services.
-#   3. Before or after the first deploy, open okdriver-backend -> Environment
-#      in the Render dashboard and set DATABASE_URL to the connection string
-#      for your external MySQL instance (for example, Aiven).
-#
-# Everything else (JWT_SECRET, CORS_ORIGINS, API_BASE_URL, WS_BASE_URL) is
-# still wired up automatically between the two services, same as before.
-
 services:
   - type: web
     name: okdriver-backend
@@ -41,8 +9,6 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      # Set this in the Render dashboard. Keep the database password out of
-      # this repository and use the mysql+pymysql URL format expected by the app.
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
@@ -53,7 +19,6 @@ services:
         value: "120"
       - key: HEARTBEAT_DEGRADED_SECONDS
         value: "45"
-      # Bare hostname; app.core.config.cors_origins_list prepends https://
       - key: CORS_ORIGINS
         fromService:
           type: web
@@ -69,7 +34,6 @@ services:
     dockerContext: ./frontend
     autoDeploy: true
     envVars:
-      # Bare hostname; docker-entrypoint.sh prepends https:// / wss://
       - key: API_BASE_URL
         fromService:
           type: web

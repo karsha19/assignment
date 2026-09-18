@@ -130,7 +130,6 @@ def test_alert_lifecycle_transitions(client, admin_token, operator_token):
     assert ack.status_code == 200
     assert ack.json()["status"] == "acknowledged"
 
-    # Cannot acknowledge twice
     ack2 = client.post(f"/api/v1/alerts/{alert['id']}/acknowledge", headers=auth_header(operator_token))
     assert ack2.status_code == 409
 

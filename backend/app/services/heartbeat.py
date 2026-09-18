@@ -31,7 +31,7 @@ async def _evaluate_once():
     db = SessionLocal()
     try:
         now = datetime.utcnow()
-        cameras = db.query(Camera).filter(Camera.is_enabled == True).all()  # noqa: E712
+        cameras = db.query(Camera).filter(Camera.is_enabled == True).all()
         for camera in cameras:
             if camera.last_heartbeat is None:
                 continue

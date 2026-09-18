@@ -18,8 +18,6 @@ async def dashboard_ws(websocket: WebSocket, token: str = Query(...)):
     await manager.connect(websocket)
     try:
         while True:
-            # Clients don't need to send anything; this just keeps the
-            # connection open and lets us detect disconnects.
             await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
