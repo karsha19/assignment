@@ -20,7 +20,9 @@ services:
       retries: 20
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     depends_on:
       mysql:
@@ -32,6 +34,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      # Optional: overrides the videos baked into the image at build time,
+      # so swapping in your own footage in data/sample/ takes effect on
+      # `docker compose restart backend` without a rebuild. Safe to remove.
       - ./data/sample:/media/sample:ro
 
   frontend:

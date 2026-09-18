@@ -59,7 +59,8 @@ audit page.
 
 See `README.md` §10 for the full list. In short: no real RTSP/ONVIF/vendor
 camera connections (documented stubs only, by design — not claimed as
-working); no bundled sample video files (instructions provided instead);
+working); the two bundled sample videos are synthetic placeholders, not real
+footage (see `data/sample/README.md`);
 synchronous (not queue-decoupled) watchlist matching; single-process
 WebSocket manager; no rate limiting; no CI/CD; diagrams are Mermaid rather
 than exported image files; no screen-recorded demo video is included in
@@ -93,9 +94,9 @@ setup).
 3. Camera Registry already has two seeded cameras (C001, C002); optionally
    add a third to demonstrate the Add Camera flow live.
 4. Camera Map shows both markers.
-5. Open a camera's detail page — video will play if sample MP4s were added
-   per `data/sample/README.md`, otherwise a documented "no preview" state
-   shows instead.
+5. Open a camera's detail page — the bundled synthetic sample video plays
+   automatically (swap in real footage per `data/sample/README.md` if you
+   want the actual submission to use real footage).
 6. Use `docs/api-workflows.md` step 4 to POST a new matching analytics
    event via `/docs` (Swagger UI) while the Dashboard or Alerts Center is
    open in another tab — the alert appears immediately without a refresh.

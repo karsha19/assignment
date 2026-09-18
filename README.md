@@ -9,8 +9,10 @@ logging.
 > **Honesty note on scope.** This is a hiring-assignment prototype, not a
 > production system. Section 10 ("Known limitations") lists exactly what is
 > and isn't implemented — in particular, no real RTSP/ONVIF camera
-> connection exists (see `docs/architecture.md` §3 and §6), and no sample
-> MP4 files are bundled (see `data/sample/README.md`).
+> connection exists (see `docs/architecture.md` §3 and §6). The two bundled
+> sample videos are synthetically generated placeholders, not real CCTV
+> footage (see `data/sample/README.md` for why, and how to swap in real
+> footage).
 
 ## 1. Features
 
@@ -82,9 +84,10 @@ Open:
 - Administrator: `admin` / `Admin@12345`
 - Operator: `operator` / `Operator@12345`
 
-To see actual video playback, follow `data/sample/README.md` to add two
-sample MP4 files before starting the stack (or add/point cameras at your own
-files afterward from the Camera Registry UI).
+Two sample videos ship in `data/sample/` and are wired up by the seed
+script automatically — video playback works immediately with no extra
+setup. See `data/sample/README.md` for what they are (synthetic
+placeholders, clearly labeled) and how to swap in real footage.
 
 ## 5. Deploying to Render
 
@@ -140,7 +143,10 @@ three services in one go:
   external managed MySQL provider (set `MYSQL_HOST`/`MYSQL_PORT`/etc., or a
   full `DATABASE_URL`, to point at it instead) and delete the
   `okdriver-mysql` service block.
-- No sample video files are deployed (see §10 and `data/sample/README.md`);
+- The two bundled sample videos are baked directly into the backend Docker
+  image (`COPY data/sample /media/sample` in `backend/Dockerfile`, built
+  with the repo root as context), so video playback works on Render too,
+  with no extra setup;
   video playback will show the documented "no preview available" state
   until you add real files to the image or point `stream_reference` at an
   externally hosted URL.
@@ -159,7 +165,8 @@ cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-export DATABASE_URL=""
+# Point at a MySQL instance you control, e.g.:
+export DATABASE_URL="mysql+pymysql://okdriver:okdriver_password@localhost:3306/okdriver"
 export JWT_SECRET="a-long-random-secret"
 
 alembic upgrade head
@@ -215,10 +222,12 @@ movement-history ordering.
 - **No live RTSP/ONVIF/vendor-API camera support.** Only recorded-MP4 and
   simulated sources are functional; the other three are adapter stubs that
   raise `NotImplementedError` by design (see `docs/architecture.md`).
-- **No bundled sample video files** — see `data/sample/README.md` for how to
-  add your own; without them the app still works, it just shows a
-  documented "no preview available" / "playback failed" state rather than
-  faking a stream.
+- **Bundled sample videos are synthetic, not real footage.** The two clips
+  in `data/sample/` are generated placeholders (moving boxes standing in
+  for vehicles, camera label and timestamp burned in) — they exercise the
+  full playback pipeline but are clearly not real CCTV footage. See
+  `data/sample/README.md` for why, and how to swap in real footage before
+  a final submission.
 - **Synchronous match-then-alert flow.** Watchlist correlation happens
   inline within the ingestion request for demo simplicity; `docs/scalability.md`
   §5 describes how this decouples at scale via a queue.
@@ -229,7 +238,11 @@ movement-history ordering.
 - **No rate limiting implemented** in this prototype (documented as a gap,
   not silently omitted) — see the "Security notes" below.
 - **No CI/CD pipeline** configured.
-
+- **Architecture/ER diagrams are Mermaid** (in `docs/architecture.md` and
+  `docs/database-schema.md`), not a separately exported image file.
+- **The 3–5 minute screen-recorded demo video is not included in this
+  repository** — recording it requires an actual run-through by whoever
+  submits this assignment.
 
 ## 11. Security notes
 

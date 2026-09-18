@@ -1,26 +1,48 @@
-# Sample Video Setup
+# Sample Video
 
-This prototype ships without embedded MP4 files (to keep the repository
-small and avoid redistributing footage of uncertain licensing). To run the
-full video-playback demonstration:
+This folder ships with two working sample video files:
 
-1. Obtain two short, legally usable traffic/CCTV-style clips. Good sources:
-   - Your own recorded footage (dashcam, phone, or a static camera)
-   - Royalty-free stock footage sites that explicitly allow redistribution
-     (e.g. Pexels Videos, Pixabay Videos) — search "traffic junction" and
-     "checkpoint" / "toll booth"
-2. Save them as:
-   - `data/sample/c001_traffic_junction.mp4`
-   - `data/sample/c002_rto_checkpoint.mp4`
-3. These paths match the `stream_reference` values used by `seed.py`. The
-   `data/sample/` folder is mounted read-only into the backend container at
-   `/media/sample` (see `docker-compose.yml`), and the backend serves it as
-   static files at `GET /media/sample/<filename>`. The frontend resolves each
-   camera's `playback_url` against the API base URL automatically — no
-   further configuration is needed once the files exist at the paths above.
-4. If no video files are present, the Camera Detail page will show "Playback
-   failed" — this is expected and documented, not a bug.
+- `c001_traffic_junction.mp4` — stand-in for Camera C001 (Ahmedabad Traffic Junction)
+- `c002_rto_checkpoint.mp4` — stand-in for Camera C002 (RTO Checkpoint), showing
+  the exact plate (`GJ01XX0001`) that `seed.py` registers as a watchlist match,
+  so the video, the seeded detection events, and the alert demo all line up
 
-**Important:** this is recorded/simulated footage. Nothing in this
-application should be represented as a real-time RTSP or ONVIF camera
-connection.
+**These are synthetically generated placeholder clips (built with ffmpeg —
+moving colored boxes standing in for vehicles, burned-in camera label and
+timestamp), not real CCTV footage.** They exist so the recorded-video
+playback pipeline (static serving, HTML5 `<video>`, error states) is fully
+exercised out of the box without redistributing footage of uncertain
+licensing. Each clip is clearly labeled on-frame as synthetic, and the app
+labels the source protocol as "recorded" everywhere in the UI — nothing here
+is presented as a live or real camera feed.
+
+They are wired up by default: `seed.py` sets each camera's
+`stream_reference` to `/media/sample/<filename>`, the backend serves this
+folder as static files at `GET /media/sample/<filename>` (see
+`app/main.py`), and the frontend resolves each camera's `playback_url`
+against the API base URL automatically. No extra configuration is needed —
+`docker compose up --build` (or a local `alembic upgrade head && python
+seed.py`) gives you working video playback immediately.
+
+## Swapping in real footage for your final submission
+
+If you'd rather use real, legally usable footage for the actual submission
+(recommended for the video-demonstration deliverable, since the assignment
+asks for "legally usable sample CCTV footage or self-created recorded
+footage"):
+
+1. Obtain two short clips — your own recording, or footage from a
+   stock-video site that explicitly allows redistribution (e.g. Pexels
+   Videos, Pixabay Videos); search "traffic junction" / "checkpoint" or
+   "toll booth".
+2. Replace `c001_traffic_junction.mp4` and `c002_rto_checkpoint.mp4` with
+   your files (same filenames, or update `stream_reference` on each camera
+   from the Camera Registry UI if you rename them).
+3. Everything else — static serving, playback, error handling — keeps
+   working unchanged.
+
+## Regenerating the placeholder clips
+
+The exact ffmpeg commands used to generate the two included clips are in
+`data/sample/generate_placeholder_videos.sh` if you want to tweak duration,
+resolution, or the on-screen labels.
