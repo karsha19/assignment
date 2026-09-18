@@ -69,7 +69,7 @@ class Settings(BaseSettings):
         return str(repo_root / "data" / "sample")
 
     class Config:
-        env_file = ".env"
+        env_file = str(Path(__file__).resolve().parents[3] / ".env")
         extra = "ignore"
 
 
