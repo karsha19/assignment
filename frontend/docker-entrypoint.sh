@@ -16,11 +16,23 @@ set -e
 # which keeps this compatible with docker-compose's plain http/ws defaults.
 case "$API_BASE_URL" in
   http://*|https://*) ;;
-  *) API_BASE_URL="https://${API_BASE_URL}" ;;
+  *)
+    case "$API_BASE_URL" in
+      *.*) ;;
+      *) API_BASE_URL="${API_BASE_URL}.onrender.com" ;;
+    esac
+    API_BASE_URL="https://${API_BASE_URL}"
+    ;;
 esac
 case "$WS_BASE_URL" in
   ws://*|wss://*) ;;
-  *) WS_BASE_URL="wss://${WS_BASE_URL}" ;;
+  *)
+    case "$WS_BASE_URL" in
+      *.*) ;;
+      *) WS_BASE_URL="${WS_BASE_URL}.onrender.com" ;;
+    esac
+    WS_BASE_URL="wss://${WS_BASE_URL}"
+    ;;
 esac
 
 cat > /app/dist/env.js <<EOF
