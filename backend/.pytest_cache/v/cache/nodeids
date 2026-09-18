@@ -1,0 +1,20 @@
+[
+  "tests/test_auth.py::test_login_invalid_password",
+  "tests/test_auth.py::test_login_success",
+  "tests/test_auth.py::test_login_unknown_user",
+  "tests/test_auth.py::test_me_requires_token",
+  "tests/test_auth.py::test_me_with_token",
+  "tests/test_cameras.py::test_admin_can_create_camera",
+  "tests/test_cameras.py::test_camera_search_by_code",
+  "tests/test_cameras.py::test_disable_camera_prevents_events",
+  "tests/test_cameras.py::test_duplicate_camera_code_rejected",
+  "tests/test_cameras.py::test_invalid_latitude_rejected",
+  "tests/test_cameras.py::test_operator_cannot_create_camera",
+  "tests/test_watchlist_and_alerts.py::test_alert_lifecycle_transitions",
+  "tests/test_watchlist_and_alerts.py::test_anpr_event_requires_identifier",
+  "tests/test_watchlist_and_alerts.py::test_disabled_watchlist_record_does_not_alert",
+  "tests/test_watchlist_and_alerts.py::test_duplicate_event_rejected",
+  "tests/test_watchlist_and_alerts.py::test_identifier_normalization_matches_variants",
+  "tests/test_watchlist_and_alerts.py::test_movement_history_orders_chronologically",
+  "tests/test_watchlist_and_alerts.py::test_nonmatching_event_creates_no_alert"
+]

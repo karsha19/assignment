@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-okdriver}
+      MYSQL_USER: ${MYSQL_USER:-okdriver}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-okdriver_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-change_me_root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER:-okdriver}:${MYSQL_PASSWORD:-okdriver_password}@mysql:3306/${MYSQL_DATABASE:-okdriver}
+      JWT_SECRET: ${JWT_SECRET:-replace_this_with_a_long_random_secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/sample:/media/sample:ro
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8000}
+      WS_BASE_URL: ${WS_BASE_URL:-ws://localhost:8000}
+      PORT: 5173
+    ports:
+      - "5173:5173"
+
+volumes:
+  mysql_data:
