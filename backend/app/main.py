@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -8,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1 import auth, cameras, watchlist, analytics, alerts, entities, audit, ws
 from app.services.heartbeat import run_heartbeat_monitor
+
+logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
@@ -40,9 +43,21 @@ app.include_router(entities.router)
 app.include_router(audit.router)
 app.include_router(ws.router)
 
-_MEDIA_DIR = "/media/sample"
+# Serves recorded/simulated sample footage only (see data/sample/README.md).
+# This is NOT a live streaming endpoint; it is a plain static file server
+# used to demonstrate the recorded-video playback workflow. See
+# Settings.resolved_media_dir for how this path is chosen (Docker vs.
+# running from source).
+_MEDIA_DIR = settings.resolved_media_dir
 if os.path.isdir(_MEDIA_DIR):
     app.mount("/media/sample", StaticFiles(directory=_MEDIA_DIR), name="sample-media")
+    logger.info("Serving sample videos from %s at /media/sample", _MEDIA_DIR)
+else:
+    logger.warning(
+        "Sample video directory not found at %s -- camera video playback will "
+        "show 'Playback failed'. Set MEDIA_DIR or check data/sample/ exists.",
+        _MEDIA_DIR,
+    )
 
 
 @app.get("/health")
