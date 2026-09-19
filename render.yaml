@@ -1,37 +1,24 @@
-# Render Blueprint for the okDriver CCTV platform - FREE PLAN ONLY.
+# Render Blueprint for the okDriver CCTV platform.
 #
-# This deploys two services from this one repo, both on Render's free web
-# service tier:
+# This deploys two services from this one repo:
 #   1. okdriver-backend  - FastAPI, built from backend/Dockerfile
 #   2. okdriver-frontend - React app, built from frontend/Dockerfile, served
 #                          with runtime env injection so it can point at the
 #                          backend's Render URL without a rebuild
 #
-# There is NO database service in this file. Render's only free database
-# offering is Postgres (and even that free instance expires after 90 days);
-# it has no free MySQL product, and private services with a persistent disk
-# (the only way to self-host MySQL on Render, as in the previous version of
-# this file) require a paid plan. To stay fully on Render's free plan, point
-# the backend at a MySQL instance hosted somewhere free instead, e.g.:
-#   - Aiven (free trial MySQL)
-#   - db4free.net
-#   - freesqldatabase.com
-#   - a MySQL instance you already run elsewhere
+# The database is intentionally external so the app can use your Aiven MySQL
+# instance (or any other MySQL host you provide). Keep the actual DATABASE_URL
+# secret in the Render dashboard rather than committing it to the repo.
 #
 # Usage:
-#   1. Set up a free MySQL instance with one of the options above (or your
-#      own) and note its host, port, username, password, and database name.
-#   2. In the Render dashboard, "New +" -> "Blueprint", point it at this
-#      repo. Render reads this file and creates both services.
+#   1. Create the repo and push it to GitHub.
+#   2. In the Render dashboard, "New +" -> "Blueprint", point it at this repo.
 #   3. Before or after the first deploy, open okdriver-backend -> Environment
-#      in the Render dashboard and fill in MYSQL_HOST / MYSQL_PORT /
-#      MYSQL_USER / MYSQL_PASSWORD / MYSQL_DATABASE with your free MySQL
-#      instance's details (they're left blank below since they depend on
-#      whichever free provider you choose, and shouldn't be committed to
-#      the repo anyway).
+#      and set DATABASE_URL to your Aiven MySQL connection string.
+#   4. Deploy the services and open the frontend URL.
 #
 # Everything else (JWT_SECRET, CORS_ORIGINS, API_BASE_URL, WS_BASE_URL) is
-# still wired up automatically between the two services, same as before.
+# wired up automatically between the two Render services.
 
 services:
   - type: web
@@ -44,18 +31,9 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      # Fill these in from the Render dashboard after choosing a free MySQL
-      # provider (see notes above) - left blank here on purpose so no
-      # database credentials are committed to the repo.
-      - key: MYSQL_HOST
-        sync: false
-      - key: MYSQL_PORT
-        value: "3306"
-      - key: MYSQL_USER
-        sync: false
-      - key: MYSQL_PASSWORD
-        sync: false
-      - key: MYSQL_DATABASE
+      # Set this in the Render dashboard to your Aiven (or other external)
+      # MySQL connection string; keep the actual value out of the repo.
+      - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
         generateValue: true
