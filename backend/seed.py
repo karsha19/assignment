@@ -39,6 +39,11 @@ def get_or_create_user(username, password, role):
 def get_or_create_camera(code, **kwargs):
     cam = db.query(m.Camera).filter(m.Camera.camera_code == code).first()
     if cam:
+        stream_reference = kwargs.get("stream_reference")
+        if stream_reference and cam.stream_reference != stream_reference:
+            cam.stream_reference = stream_reference
+            db.commit()
+            db.refresh(cam)
         return cam
     cam = m.Camera(camera_code=code, **kwargs)
     db.add(cam)
@@ -60,7 +65,7 @@ def main():
         longitude=72.5714,
         camera_type="fixed_junction",
         source_protocol=m.SourceProtocolEnum.recorded,
-        stream_reference="/media/sample/c001_traffic_junction.mp4",
+        stream_reference="/media/sample/VIRAT_S_010204_05_000856_000890.mp4",
         status=m.CameraStatusEnum.online,
         last_heartbeat=datetime.utcnow(),
         storage_metadata={"retention_days": 30},
@@ -74,7 +79,7 @@ def main():
         longitude=72.5660,
         camera_type="checkpoint",
         source_protocol=m.SourceProtocolEnum.recorded,
-        stream_reference="/media/sample/c002_rto_checkpoint.mp4",
+        stream_reference="/media/sample/VIRAT_S_050201_05_000890_000944.mp4",
         status=m.CameraStatusEnum.online,
         last_heartbeat=datetime.utcnow(),
         storage_metadata={"retention_days": 30},
