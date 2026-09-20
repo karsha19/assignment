@@ -3,87 +3,76 @@
 ## 1. Overview
 
 This prototype demonstrates the full request path required by the
-assignment: camera sources -> source adapters -> AI analytics events ->
-ingestion API -> database -> watchlist correlation -> alert generation ->
-WebSocket broadcast -> operator dashboard and GIS/movement map.
+assignment: camera sources → source adapters → ingestion API → database →
+watchlist correlation → alert generation → WebSocket broadcast → operator
+dashboard → GIS/movement visualization → audit trail.
+
+![okDriver architecture diagram](architecture-diagram.png)
+
+*Rendered with Graphviz from `architecture-diagram.dot` (regenerate with `dot -Tpng architecture-diagram.dot -o architecture-diagram.png`, or open `architecture-diagram.svg` directly). An equivalent Mermaid version (renders natively on GitHub) follows below.*
 
 ```mermaid
 flowchart LR
-  subgraph Sources["Camera and Data Sources"]
-    C1["Camera C001<br/>Recorded MP4"]
-    C2["Camera C002<br/>Simulated source"]
-    RTSP["Future live sources<br/>RTSP / ONVIF / vendor API"]
-  end
+    subgraph Sources
+        C1[Camera C001<br/>Recorded MP4]
+        C2[Camera C002<br/>Recorded MP4]
+        SIM[Analytics simulator /<br/>external AI service]
+    end
 
-  subgraph Adapters["Camera Source Adapters"]
-    RA[RecordedVideoAdapter]
-    SA[SimulatedCameraAdapter]
-    FA[Future adapters]
-  end
+    subgraph Adapters["Camera Source Adapters"]
+        RA[RecordedVideoAdapter]
+        SA[SimulatedCameraAdapter]
+        FA["Future: RTSP / ONVIF /\nVendor API adapters"]
+    end
 
-  subgraph AI["AI Analytics Events"]
-    ENGINE["ANPR / vehicle / person<br/>detection engine"]
-    EVENT["Normalized event payload<br/>identifier, confidence, bbox, timestamp"]
-  end
+    subgraph Backend["FastAPI Backend"]
+        AUTH[Auth & RBAC]
+        API[REST API v1]
+        WS[WebSocket Manager]
+        MATCH[Watchlist Matching Service]
+        HB[Heartbeat Monitor]
+    end
 
-  subgraph Backend["FastAPI Backend"]
-    AUTH["JWT auth and RBAC"]
-    INGEST["Analytics ingestion API<br/>POST /api/v1/analytics/events"]
-    MATCH["Watchlist matching<br/>exact normalized identifier"]
-    ALERTS["Alert lifecycle service"]
-    WS["WebSocket manager<br/>/ws/dashboard"]
-    HB["Heartbeat monitor"]
-    REST["REST API v1<br/>cameras, watchlist, entities, audit"]
-  end
+    subgraph DB["MySQL"]
+        T1[(cameras)]
+        T2[(analytics_events)]
+        T3[(watchlist_records)]
+        T4[(alerts)]
+        T5[(audit_logs)]
+        T6[(camera_health_events)]
+    end
 
-  subgraph DB["Aiven MySQL Database"]
-    CAM[(cameras)]
-    EVENTS[(analytics_events)]
-    WATCH[(watchlist_records)]
-    ALERT[(alerts)]
-    AUDIT[(audit_logs)]
-    HEALTH[(camera_health_events)]
-  end
+    subgraph Frontend["React Dashboard"]
+        DASH[Operational Dashboard]
+        MAP[Camera Map / Movement Map]
+        WLUI[Watchlist UI]
+        ALERTUI[Alerts Center]
+    end
 
-  subgraph Frontend["React Operator Dashboard"]
-    DASH[Operational dashboard]
-    ALERTUI[Alerts center]
-    MAP[Camera and movement map]
-    WLUI[Watchlist management]
-  end
+    C1 --> RA
+    C2 --> RA
+    SIM -->|POST /api/v1/analytics/events| API
+    RA --> API
+    SA --> API
 
-  C1 --> RA
-  C2 --> SA
-  RTSP -.-> FA
-  RA --> ENGINE
-  SA --> ENGINE
-  FA -.-> ENGINE
-  ENGINE --> EVENT
-  EVENT -->|POST /api/v1/analytics/events| INGEST
+    API --> AUTH
+    API --> T1
+    API --> T2
+    API --> MATCH
+    MATCH --> T3
+    MATCH -->|match found| T4
+    API --> T5
+    HB --> T6
+    HB --> WS
 
-  AUTH --> INGEST
-  INGEST --> EVENTS
-  INGEST --> MATCH
-  MATCH --> WATCH
-  MATCH -->|match found| ALERTS
-  ALERTS --> ALERT
-  INGEST -->|analytics_event| WS
-  ALERTS -->|watchlist_match / new_alert| WS
-  REST --> CAM
-  REST --> WATCH
-  REST --> AUDIT
-  HB --> HEALTH
-  HB --> WS
-  AUTH --> REST
+    API -->|broadcast| WS
+    WS -->|events, alerts, health| DASH
+    WS --> ALERTUI
 
-  WS -->|real-time events and health| DASH
-  WS -->|real-time alerts| ALERTUI
-  DASH --> REST
-  ALERTUI --> REST
-  MAP --> REST
-  WLUI --> REST
-  EVENTS -->|movement history| MAP
-  CAM -->|locations and status| MAP
+    DASH --> API
+    MAP --> API
+    WLUI --> API
+    ALERTUI --> API
 ```
 
 ## 2. Core demonstration flow

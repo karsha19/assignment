@@ -1,0 +1,139 @@
+digraph okdriver_er {
+  rankdir=LR;
+  bgcolor="#0b1220";
+  fontname="Helvetica";
+  labelloc="t";
+  label="okDriver CCTV Platform -- Database Schema (MySQL)";
+  fontcolor="#e7ecf5";
+  fontsize=20;
+  pad=0.4;
+  nodesep=0.55;
+  ranksep=1.1;
+  splines=spline;
+
+  node [shape=plaintext, fontname="Helvetica", fontsize=11, fontcolor="#e7ecf5"];
+  edge [fontname="Helvetica", fontsize=9, color="#7d8aa8", fontcolor="#aab4cc",
+        arrowhead=none, arrowtail=none, penwidth=1.1];
+
+  users [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#3b82f6">
+      <tr><td bgcolor="#1d3a63" colspan="3"><b>users</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left">username</td><td align="left"><font color="#fcd34d">UK</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">hashed_password</td><td></td><td align="left">string(255)</td></tr>
+      <tr><td align="left">role</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">is_active</td><td></td><td align="left">bool</td></tr>
+      <tr><td align="left">created_at / updated_at</td><td></td><td align="left">datetime</td></tr>
+    </table>
+  >];
+
+  cameras [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#3b82f6">
+      <tr><td bgcolor="#1d3a63" colspan="3"><b>cameras</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left">camera_code</td><td align="left"><font color="#fcd34d">UK</font></td><td align="left">string(32)</td></tr>
+      <tr><td align="left">name</td><td></td><td align="left">string(128)</td></tr>
+      <tr><td align="left">department</td><td align="left"><font color="#86efac">IX</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">zone</td><td align="left"><font color="#86efac">IX</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">latitude / longitude</td><td></td><td align="left">float</td></tr>
+      <tr><td align="left">camera_type</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">source_protocol</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">stream_reference</td><td></td><td align="left">string(512)</td></tr>
+      <tr><td align="left">status</td><td align="left"><font color="#86efac">IX</font></td><td align="left">enum</td></tr>
+      <tr><td align="left">last_heartbeat</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left">storage_metadata</td><td></td><td align="left">json</td></tr>
+      <tr><td align="left">is_enabled</td><td align="left"><font color="#86efac">IX</font></td><td align="left">bool</td></tr>
+      <tr><td align="left">created_at / updated_at</td><td></td><td align="left">datetime</td></tr>
+    </table>
+  >];
+
+  camera_health_events [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#3b82f6">
+      <tr><td bgcolor="#1d3a63" colspan="3"><b>camera_health_events</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left" port="camera_id">camera_id</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; cameras.id</td></tr>
+      <tr><td align="left">status</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">created_at</td><td align="left"><font color="#86efac">IX</font></td><td align="left">datetime</td></tr>
+    </table>
+  >];
+
+  analytics_events [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#22c55e">
+      <tr><td bgcolor="#123321" colspan="3"><b>analytics_events</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left">idempotency_key</td><td align="left"><font color="#fcd34d">UK</font></td><td align="left">string(128)</td></tr>
+      <tr><td align="left" port="camera_id">camera_id</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; cameras.id</td></tr>
+      <tr><td align="left">event_type</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">entity_identifier</td><td align="left"><font color="#86efac">IX</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">normalized_identifier</td><td align="left"><font color="#86efac">IX</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">confidence</td><td></td><td align="left">float</td></tr>
+      <tr><td align="left">vehicle_type</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">bounding_box</td><td></td><td align="left">json</td></tr>
+      <tr><td align="left">raw_metadata</td><td></td><td align="left">json</td></tr>
+      <tr><td align="left">event_timestamp</td><td align="left"><font color="#86efac">IX</font></td><td align="left">datetime</td></tr>
+      <tr><td align="left">created_at</td><td></td><td align="left">datetime</td></tr>
+    </table>
+  >];
+
+  watchlist_records [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#f59e0b">
+      <tr><td bgcolor="#2e2312" colspan="3"><b>watchlist_records</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left">entity_type</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">identifier</td><td align="left"><font color="#86efac">IX</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">normalized_identifier</td><td align="left"><font color="#fcd34d">UK*</font></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">display_name</td><td></td><td align="left">string(128)</td></tr>
+      <tr><td align="left">reason</td><td></td><td align="left">string(256)</td></tr>
+      <tr><td align="left">status</td><td align="left"><font color="#86efac">IX</font></td><td align="left">enum</td></tr>
+      <tr><td align="left">description</td><td></td><td align="left">text</td></tr>
+      <tr><td align="left">expiry_at</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left">created_at / updated_at</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left" colspan="3"><i>* UK on (normalized_identifier, entity_type)</i></td></tr>
+    </table>
+  >];
+
+  alerts [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#ef4444">
+      <tr><td bgcolor="#3a1a1a" colspan="3"><b>alerts</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left">alert_type</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">severity</td><td></td><td align="left">enum</td></tr>
+      <tr><td align="left">status</td><td align="left"><font color="#86efac">IX</font></td><td align="left">enum</td></tr>
+      <tr><td align="left" port="watchlist_record_id">watchlist_record_id</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; watchlist_records.id</td></tr>
+      <tr><td align="left" port="analytics_event_id">analytics_event_id</td><td align="left"><font color="#f87171">FK/UK</font></td><td align="left">-&gt; analytics_events.id</td></tr>
+      <tr><td align="left" port="camera_id">camera_id</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; cameras.id</td></tr>
+      <tr><td align="left">matched_identifier</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">confidence</td><td></td><td align="left">float</td></tr>
+      <tr><td align="left">detection_timestamp</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left">created_at</td><td align="left"><font color="#86efac">IX</font></td><td align="left">datetime</td></tr>
+      <tr><td align="left">acknowledged_at</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left" port="acknowledged_by">acknowledged_by</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; users.id</td></tr>
+      <tr><td align="left">resolved_at</td><td></td><td align="left">datetime</td></tr>
+      <tr><td align="left" port="resolved_by">resolved_by</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; users.id</td></tr>
+    </table>
+  >];
+
+  audit_logs [label=<
+    <table border="1" cellborder="0" cellspacing="0" cellpadding="5" bgcolor="#12213a" color="#a78bfa">
+      <tr><td bgcolor="#291f47" colspan="3"><b>audit_logs</b></td></tr>
+      <tr><td align="left" port="id">id</td><td align="left"><font color="#93c5fd">PK</font></td><td align="left">string(36)</td></tr>
+      <tr><td align="left" port="actor_user_id">actor_user_id</td><td align="left"><font color="#f87171">FK</font></td><td align="left">-&gt; users.id (nullable)</td></tr>
+      <tr><td align="left">action</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">resource_type</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">resource_id</td><td></td><td align="left">string(64)</td></tr>
+      <tr><td align="left">result</td><td></td><td align="left">string(32)</td></tr>
+      <tr><td align="left">metadata_json</td><td></td><td align="left">json</td></tr>
+      <tr><td align="left">created_at</td><td align="left"><font color="#86efac">IX</font></td><td align="left">datetime</td></tr>
+    </table>
+  >];
+
+  // Foreign key relationships (source FK column -> target PK column)
+  camera_health_events:camera_id:e -> cameras:id:w [label="  N:1", color="#3b82f6", fontcolor="#93c5fd"];
+  analytics_events:camera_id:e     -> cameras:id:w [label="  N:1", color="#22c55e", fontcolor="#86efac"];
+  alerts:camera_id:e               -> cameras:id:w [label="  N:1", color="#ef4444", fontcolor="#fca5a5"];
+  alerts:watchlist_record_id:e     -> watchlist_records:id:w [label="  N:1", color="#ef4444", fontcolor="#fca5a5"];
+  alerts:analytics_event_id:e      -> analytics_events:id:w [label="  1:1", color="#ef4444", fontcolor="#fca5a5", penwidth=1.6];
+  alerts:acknowledged_by:e         -> users:id:w [label="  N:1", style=dashed, color="#94a3b8"];
+  alerts:resolved_by:e             -> users:id:w [label="  N:1", style=dashed, color="#94a3b8"];
+  audit_logs:actor_user_id:e       -> users:id:w [label="  N:1", style=dashed, color="#94a3b8"];
+}

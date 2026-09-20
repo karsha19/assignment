@@ -25,6 +25,13 @@
   feed driven by the WebSocket
 - Alembic migration (full schema) + reproducible, idempotent seed script
 - Docker Compose orchestration (MySQL, backend, frontend)
+- Architecture diagram (`docs/architecture-diagram.png`/`.svg`) covering
+  sources → adapters → backend → database → watchlist → alerts → dashboard
+  → map, and a database ER diagram (`docs/database-schema-diagram.png`/`.svg`)
+  covering all 7 tables with columns, types, and FK relationships — both
+  rendered from Graphviz `.dot` sources, not just Mermaid text, and both
+  embedded in `docs/architecture.md` / `docs/database-schema.md`
+  respectively
 - 18 automated backend tests, all passing
 
 ## Tested workflows
@@ -62,10 +69,9 @@ camera connections (documented stubs only, by design — not claimed as
 working); the two bundled sample videos are synthetic placeholders, not real
 footage (see `data/sample/README.md`);
 synchronous (not queue-decoupled) watchlist matching; single-process
-WebSocket manager; no rate limiting; no CI/CD; diagrams are Mermaid rather
-than exported image files; no screen-recorded demo video is included in
-this repository, since recording an authentic walkthrough requires a live
-run by whoever submits the assignment.
+WebSocket manager; no rate limiting; no CI/CD; no screen-recorded demo video
+is included in this repository, since recording an authentic walkthrough
+requires a live run by whoever submits the assignment.
 
 ## Optional features implemented
 

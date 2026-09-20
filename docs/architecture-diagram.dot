@@ -1,0 +1,83 @@
+digraph okdriver_architecture {
+  rankdir=LR;
+  bgcolor="#0b1220";
+  fontname="Helvetica";
+  labelloc="t";
+  label="okDriver CCTV Monitoring, Video Analytics and Real-Time Alert Platform -- Architecture";
+  fontcolor="#e7ecf5";
+  fontsize=20;
+  pad=0.4;
+  nodesep=0.35;
+  ranksep=0.65;
+
+  node [fontname="Helvetica", fontsize=11, style="filled", fontcolor="#e7ecf5", shape=box, margin="0.18,0.12"];
+  edge [fontname="Helvetica", fontsize=9, color="#7d8aa8", fontcolor="#aab4cc", arrowsize=0.75];
+
+  subgraph cluster_sources {
+    label="1. Camera Sources"; style="rounded"; color="#3b82f6"; fontcolor="#93c5fd"; bgcolor="#111a2e"; fontsize=13;
+    C001 [label="Camera C001\nAhmedabad Traffic Junction\n(recorded MP4)", fillcolor="#17233d", color="#3b82f6"];
+    C002 [label="Camera C002\nRTO Checkpoint\n(recorded MP4)", fillcolor="#17233d", color="#3b82f6"];
+    SIM  [label="Analytics Simulator /\nExternal AI Inference Service\n(ANPR, vehicle/person detection)", fillcolor="#17233d", color="#3b82f6"];
+  }
+
+  subgraph cluster_adapters {
+    label="2. Camera Source Adapters"; style="rounded"; color="#f59e0b"; fontcolor="#fcd34d"; bgcolor="#241c10"; fontsize=13;
+    RA [label="RecordedVideoAdapter /\nSimulatedCameraAdapter\n(working)", fillcolor="#2e2312", color="#f59e0b"];
+    FA [label="RTSPAdapter / ONVIFAdapter /\nVendorAPIAdapter\n(documented stubs, future)", fillcolor="#2e2312", color="#f59e0b", style="filled,dashed"];
+  }
+
+  subgraph cluster_backend {
+    label="3. FastAPI Backend"; style="rounded"; color="#22c55e"; fontcolor="#86efac"; bgcolor="#0f2417"; fontsize=13;
+    AUTH  [label="Auth & RBAC\nJWT + bcrypt, role checks\non every protected route", fillcolor="#123321", color="#22c55e"];
+    API   [label="REST API v1\ncameras / watchlist / analytics\n/ alerts / entities / audit", fillcolor="#123321", color="#22c55e"];
+    MATCH [label="Watchlist Matching Service\nidentifier normalize + exact match", fillcolor="#123321", color="#22c55e"];
+    HB    [label="Heartbeat Monitor\nonline / degraded / offline\nthresholding", fillcolor="#123321", color="#22c55e"];
+    WS    [label="WebSocket Connection Manager\n/ws/dashboard broadcast", fillcolor="#123321", color="#22c55e"];
+  }
+
+  subgraph cluster_db {
+    label="4. MySQL Database"; style="rounded"; color="#ef4444"; fontcolor="#fca5a5"; bgcolor="#2a1414"; fontsize=13;
+    T1 [label="cameras\ncamera_health_events", shape=cylinder, fillcolor="#3a1a1a", color="#ef4444"];
+    T2 [label="analytics_events\n(AI detection events)", shape=cylinder, fillcolor="#3a1a1a", color="#ef4444"];
+    T3 [label="watchlist_records", shape=cylinder, fillcolor="#3a1a1a", color="#ef4444"];
+    T4 [label="alerts", shape=cylinder, fillcolor="#3a1a1a", color="#ef4444"];
+    T5 [label="audit_logs", shape=cylinder, fillcolor="#3a1a1a", color="#ef4444"];
+  }
+
+  subgraph cluster_frontend {
+    label="5. React Dashboard (Frontend)"; style="rounded"; color="#a78bfa"; fontcolor="#d8b4fe"; bgcolor="#201a33"; fontsize=13;
+    DASH    [label="Operational Dashboard\nstats, camera grid, activity feed", fillcolor="#291f47", color="#a78bfa"];
+    MAP     [label="Camera Map / Movement Map\n(Leaflet, status + route)", fillcolor="#291f47", color="#a78bfa"];
+    WLUI    [label="Watchlist Management UI", fillcolor="#291f47", color="#a78bfa"];
+    ALERTUI [label="Alerts Center\nacknowledge / resolve", fillcolor="#291f47", color="#a78bfa"];
+  }
+
+  // Sources -> Adapters -> Backend
+  C001 -> RA;
+  C002 -> RA;
+  RA -> API [label="playback_url"];
+  FA -> API [style=dashed, label="future integration"];
+  SIM -> API [label="POST /api/v1/analytics/events", color="#22c55e", fontcolor="#86efac", penwidth=1.4];
+
+  // Backend internals
+  API -> AUTH [dir=both, style=dashed, color="#94a3b8"];
+  API -> T1 [label="camera CRUD"];
+  API -> T2 [label="persist event"];
+  API -> MATCH [label="4. correlate", color="#22c55e", fontcolor="#86efac", penwidth=1.4];
+  MATCH -> T3 [label="lookup active\nwatchlist records"];
+  MATCH -> T4 [label="5. create alert\non match", color="#ef4444", fontcolor="#fca5a5", penwidth=1.4];
+  API -> T5 [label="audit log"];
+  HB -> T1 [label="health transitions"];
+  HB -> WS [label="camera_health_changed"];
+  API -> WS [label="6. broadcast\nanalytics_event,\nnew_alert", color="#3b82f6", fontcolor="#93c5fd", penwidth=1.4];
+
+  // Real-time to frontend
+  WS -> DASH [label="7. live updates\n(no refresh)", color="#3b82f6", fontcolor="#93c5fd", penwidth=1.4];
+  WS -> ALERTUI [color="#3b82f6"];
+
+  // Frontend reads via REST
+  DASH -> API [label="fetch/poll", style=dashed];
+  MAP -> API [label="cameras +\nmovement-history", style=dashed];
+  WLUI -> API [style=dashed];
+  ALERTUI -> API [label="ack / resolve", style=dashed];
+}

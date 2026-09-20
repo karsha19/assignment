@@ -39,6 +39,10 @@ logging.
   admin-only viewing UI
 - Alembic migrations + reproducible seed script with synthetic
   demonstration data
+- Architecture diagram (`docs/architecture-diagram.png`/`.svg`) and
+  database ER diagram (`docs/database-schema-diagram.png`/`.svg`), both
+  rendered from Graphviz `.dot` sources and embedded in `docs/architecture.md`
+  / `docs/database-schema.md`
 - 18 automated backend tests (auth, authorization, camera validation,
   duplicate-event handling, watchlist matching incl. identifier
   normalization, alert lifecycle, movement-history ordering) — all passing
@@ -238,8 +242,6 @@ movement-history ordering.
 - **No rate limiting implemented** in this prototype (documented as a gap,
   not silently omitted) — see the "Security notes" below.
 - **No CI/CD pipeline** configured.
-- **Architecture/ER diagrams are Mermaid** (in `docs/architecture.md` and
-  `docs/database-schema.md`), not a separately exported image file.
 - **The 3–5 minute screen-recorded demo video is not included in this
   repository** — recording it requires an actual run-through by whoever
   submits this assignment.
@@ -299,8 +301,10 @@ frontend/
 
 docs/
   architecture.md
+  architecture-diagram.png / .svg / .dot
   scalability.md
   database-schema.md
+  database-schema-diagram.png / .svg / .dot
   api-workflows.md
 
 data/sample/               where sample MP4s go (see README.md there)

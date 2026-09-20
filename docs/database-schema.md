@@ -4,6 +4,15 @@ Engine: MySQL 8.0 (via SQLAlchemy 2.0 + Alembic migrations in `backend/migration
 
 ## ER Diagram
 
+![okDriver database ER diagram](database-schema-diagram.png)
+
+*Rendered with Graphviz from `database-schema-diagram.dot` (regenerate with
+`dot -Tpng database-schema-diagram.dot -o database-schema-diagram.png`, or
+open `database-schema-diagram.svg` directly for a scalable version).
+`PK`/`FK`/`UK`/`IX` mark primary keys, foreign keys, unique constraints, and
+indexes respectively; dashed edges are nullable FKs. An equivalent Mermaid
+version (renders natively on GitHub) follows below.*
+
 ```mermaid
 erDiagram
     USERS ||--o{ AUDIT_LOGS : "performs"
