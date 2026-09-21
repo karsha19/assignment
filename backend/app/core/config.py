@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
     HEARTBEAT_OFFLINE_SECONDS: int = 120
     HEARTBEAT_DEGRADED_SECONDS: int = 45
+    # Minimum confidence for an analytics event to be considered for
+    # generating a watchlist match alert. This lets callers adjust sensitivity.
+    WATCHLIST_MATCH_CONFIDENCE_MIN: float = 0.85
+    # Fuzzy matching threshold (0..1) used when exact normalized matches
+    # fail. Lower increases recall but risks false positives.
+    WATCHLIST_FUZZY_THRESHOLD: float = 0.90
 
     # Directory the backend serves sample videos from at /media/sample/*.
     # If unset, it's auto-detected: inside the Docker image the Dockerfile

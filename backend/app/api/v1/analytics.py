@@ -11,7 +11,8 @@ from app.models.models import (
 )
 from app.schemas.schemas import AnalyticsEventCreate, AnalyticsEventOut, AlertOut
 from app.core.security import get_current_user
-from app.services.matching import normalize_identifier
+from app.services.matching import normalize_identifier, similarity
+from app.core.config import settings
 from app.services.audit import record_audit
 from app.websocket.manager import manager
 
@@ -74,6 +75,7 @@ async def ingest_event(
 
     alert = None
     if normalized:
+        # First: exact normalized match
         match = (
             db.query(WatchlistRecord)
             .filter(
@@ -82,7 +84,30 @@ async def ingest_event(
             )
             .first()
         )
-        if match and (match.expiry_at is None or match.expiry_at > datetime.utcnow()):
+        # Only proceed if event confidence exceeds the configured minimum
+        min_conf = settings.WATCHLIST_MATCH_CONFIDENCE_MIN
+        event_conf_ok = (payload.confidence or 0.0) >= min_conf
+
+        if not match:
+            # Try fuzzy matching when no exact match found. This scans active
+            # watchlist records and uses a similarity ratio to find close
+            # identifiers. This is conservative (threshold configured) to avoid
+            # false positives.
+            fuzzy_thresh = settings.WATCHLIST_FUZZY_THRESHOLD
+            candidates = (
+                db.query(WatchlistRecord)
+                .filter(WatchlistRecord.status == WatchlistStatusEnum.active)
+                .all()
+            )
+            for cand in candidates:
+                if not cand.normalized_identifier:
+                    continue
+                sim = similarity(normalized, cand.normalized_identifier)
+                if sim >= fuzzy_thresh:
+                    match = cand
+                    break
+
+        if match and (match.expiry_at is None or match.expiry_at > datetime.utcnow()) and event_conf_ok:
             severity = AlertSeverityEnum.critical if match.entity_type.value in (
                 "stolen_vehicle", "wanted_person"
             ) else AlertSeverityEnum.high
