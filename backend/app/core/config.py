@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
+import json
 from pathlib import Path
 
 
@@ -44,16 +45,36 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> List[str]:
-        origins = []
-        for o in self.CORS_ORIGINS.split(","):
-            o = o.strip()
+        origins: List[str] = []
+        raw = (self.CORS_ORIGINS or "").strip()
+        if not raw:
+            return origins
+
+        items: List[str] = []
+        # Accept either a JSON array env var or a comma-separated string
+        if raw.startswith("[") and raw.endswith("]"):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    items = [str(x) for x in parsed]
+                else:
+                    items = [raw]
+            except Exception:
+                items = [raw]
+        else:
+            items = [x.strip() for x in raw.split(",") if x.strip()]
+
+        for o in items:
+            # Normalize quoted values
+            o = o.strip().strip('"').strip("'")
             if not o:
                 continue
-            # Render's fromService "host" property returns a bare hostname
-            # (no scheme). Accept that form and assume HTTPS, since every
-            # Render web service is served over TLS.
-            if not o.startswith("http://") and not o.startswith("https://"):
-                o = f"https://{o}"
+            # If scheme is missing, assume https for non-localhost hosts
+            if not (o.startswith("http://") or o.startswith("https://")):
+                if "localhost" in o or o.startswith("127."):
+                    o = f"http://{o}"
+                else:
+                    o = f"https://{o}"
             origins.append(o)
         return origins
 
