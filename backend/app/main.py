@@ -9,12 +9,41 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1 import auth, cameras, watchlist, analytics, alerts, entities, audit, ws
 from app.services.heartbeat import run_heartbeat_monitor
+from app.db.session import SessionLocal
+from app.models.models import User
+
+# seed.py lives at the backend package root and provides an idempotent
+# data seeder used for demo deployments.
+try:
+    import seed as seeder
+except Exception:
+    seeder = None
 
 logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # If the database has no users, optionally populate demo data so
+    # deployments (eg. Render) get a working admin/operator account.
+    # To avoid seeding in production, this runs only when
+    # `settings.ENV != "production"` or when `SEED_ON_STARTUP=1` is set.
+    db = SessionLocal()
+    try:
+        try:
+            user_count = db.query(User).count()
+        except Exception:
+            user_count = 0
+        if user_count == 0 and seeder is not None:
+            if settings.ENV != "production" or os.getenv("SEED_ON_STARTUP", "") == "1":
+                logger.info("No users found in DB; running demo seeder to create admin/operator accounts")
+                try:
+                    seeder.main()
+                except Exception:
+                    logger.exception("Seeder run failed")
+    finally:
+        db.close()
+
     task = asyncio.create_task(run_heartbeat_monitor())
     yield
     task.cancel()
