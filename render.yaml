@@ -35,6 +35,10 @@ services:
       # MySQL connection string; keep the actual value out of the repo.
       - key: DATABASE_URL
         sync: false
+      - key: SEED_ON_STARTUP
+        value: "1"
+      - key: ENV
+        value: production
       - key: JWT_SECRET
         generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
