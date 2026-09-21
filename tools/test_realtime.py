@@ -49,7 +49,11 @@ def post_event(api_url, token, camera_id, identifier, confidence):
         'event_timestamp': datetime.now(timezone.utc).isoformat(),
     }
     r = requests.post(url, json=payload, headers={'Authorization': f'Bearer {token}'}, timeout=10)
-    return r.status_code, r.text
+    try:
+        body = r.json()
+    except Exception:
+        body = r.text
+    return r.status_code, body
 
 
 async def listen_ws(api_url, token, duration=10):

@@ -84,6 +84,23 @@ Open:
 - API docs (Swagger): http://localhost:8000/docs
 - Health check: http://localhost:8000/health
 
+## Quick setup and realtime test (Windows PowerShell)
+
+Run the included helper to create a virtualenv, install backend deps, and run the realtime test script:
+
+```powershell
+# from repo root
+scripts\setup_and_run_realtime.ps1
+```
+
+To pass a different API URL or credentials:
+
+```powershell
+scripts\setup_and_run_realtime.ps1 -ApiUrl "http://127.0.0.1:8000" -Username admin -Password Admin@12345
+```
+
+If you plan to run the RTSP ingest worker, install Tesseract for Windows (see scripts/setup_and_run_realtime.ps1 for guidance).
+
 **Demo credentials** (created by `seed.py`):
 - Administrator: `admin` / `Admin@12345`
 - Operator: `operator` / `Operator@12345`
