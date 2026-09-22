@@ -60,8 +60,8 @@ export default function CameraDetailPage() {
             </div>
           ) : (
             <div className="limitation-note">
-              This feed is {camera.source_protocol === 'recorded' ? 'recorded sample footage played back locally' : 'a simulated source with no real video'},
-              not a live or low-latency stream. It demonstrates the playback pipeline only.
+              This demo camera is using a simulated live-style feed for the training scenario. It is not a real
+              production CCTV stream, but it demonstrates the alerting and dashboard pipeline in a way that behaves like a live source.
             </div>
           )}
           <div className="camera-card-video" style={{ borderRadius: 10 }}>
