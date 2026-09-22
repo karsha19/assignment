@@ -1,17 +1,3 @@
-"""
-Reproducible demonstration data seeder.
-
-Usage: python seed.py
-
-Creates:
-- 1 admin user, 1 operator user
-- 2 cameras (recorded-video sources) with distinct locations
-- 1 watchlist record that WILL match an upcoming demo detection
-- Sample analytics events: one matching detection, one non-matching detection,
-  and several detections of the same vehicle across both cameras to populate
-  movement history
-- Alerts in different lifecycle states
-"""
 import uuid
 from datetime import datetime, timedelta
 

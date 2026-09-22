@@ -12,8 +12,7 @@ from app.services.heartbeat import run_heartbeat_monitor
 from app.db.session import SessionLocal
 from app.models.models import User
 
-# seed.py lives at the backend package root and provides an idempotent
-# data seeder used for demo deployments.
+
 try:
     import seed as seeder
 except Exception:
@@ -24,10 +23,7 @@ logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # If the database has no users, optionally populate demo data so
-    # deployments (eg. Render) get a working admin/operator account.
-    # To avoid seeding in production, this runs only when
-    # `settings.ENV != "production"` or when `SEED_ON_STARTUP=1` is set.
+
     db = SessionLocal()
     try:
         try:
@@ -79,11 +75,6 @@ app.include_router(entities.router)
 app.include_router(audit.router)
 app.include_router(ws.router)
 
-# Serves recorded/simulated sample footage only (see data/sample/README.md).
-# This is NOT a live streaming endpoint; it is a plain static file server
-# used to demonstrate the recorded-video playback workflow. See
-# Settings.resolved_media_dir for how this path is chosen (Docker vs.
-# running from source).
 _MEDIA_DIR = settings.resolved_media_dir
 if os.path.isdir(_MEDIA_DIR):
     app.mount("/media/sample", StaticFiles(directory=_MEDIA_DIR), name="sample-media")

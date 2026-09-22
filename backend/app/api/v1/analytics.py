@@ -75,7 +75,6 @@ async def ingest_event(
 
     alert = None
     if normalized:
-        # First: exact normalized match
         match = (
             db.query(WatchlistRecord)
             .filter(
@@ -84,15 +83,10 @@ async def ingest_event(
             )
             .first()
         )
-        # Only proceed if event confidence exceeds the configured minimum
         min_conf = settings.WATCHLIST_MATCH_CONFIDENCE_MIN
         event_conf_ok = (payload.confidence or 0.0) >= min_conf
 
         if not match:
-            # Try fuzzy matching when no exact match found. This scans active
-            # watchlist records and uses a similarity ratio to find close
-            # identifiers. This is conservative (threshold configured) to avoid
-            # false positives.
             fuzzy_thresh = settings.WATCHLIST_FUZZY_THRESHOLD
             candidates = (
                 db.query(WatchlistRecord)

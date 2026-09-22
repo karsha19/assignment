@@ -34,7 +34,7 @@ def test_identifier_normalization_matches_variants(client, admin_token, operator
         "idempotency_key": "evt-norm-1",
         "camera_id": camera_id,
         "event_type": "anpr",
-        "entity_identifier": "gj-01 xx-0001",  # different casing/formatting
+        "entity_identifier": "gj-01 xx-0001",
         "confidence": 0.9,
         "event_timestamp": "2026-01-01T10:00:00",
     }

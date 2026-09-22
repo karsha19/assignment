@@ -180,14 +180,6 @@ async def submit_heartbeat(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Documented simulated heartbeat endpoint. In production this would be
-    called by an actual camera/edge-gateway health probe rather than by an
-    authenticated dashboard user. Each call marks the camera 'online' and
-    records the timestamp; a background thresholding pass (see
-    app.services.heartbeat) later demotes cameras to degraded/offline if
-    heartbeats stop arriving.
-    """
     camera = db.query(Camera).filter(Camera.id == camera_id).first()
     if not camera or not camera.is_enabled:
         raise HTTPException(status_code=404, detail="Camera not found or disabled")

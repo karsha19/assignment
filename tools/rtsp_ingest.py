@@ -1,25 +1,3 @@
-"""
-Lightweight RTSP ingest worker.
-
-Requirements (backend/requirements.txt additions):
-- opencv-python
-- pytesseract
-- requests
-- imutils
-
-Usage (examples):
-python tools/rtsp_ingest.py \
-  --rtsp rtsp://user:pass@camera:554/stream \
-  --camera-id <camera-id> \
-  --api-url https://okdriver-backend-t5dl.onrender.com \
-  --auth-token <bearer-token> \
-  --interval 1.0
-
-The script captures frames, extracts candidate plate text via pytesseract,
-computes a simple confidence estimate, and POSTS events to the backend
-`/api/v1/analytics/events` endpoint using the provided token.
-"""
-
 import argparse
 import time
 import uuid
@@ -40,20 +18,16 @@ PLATE_CANDIDATE_RE = re.compile(r"[A-Z0-9]{4,}")
 
 
 def extract_plate_candidates(img):
-    # img: BGR image from OpenCV
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # Resize for better OCR on small plates
     h, w = gray.shape
     scale = 800.0 / max(w, h) if max(w, h) < 1200 else 1.0
     if scale != 1.0:
         gray = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
 
-    # Apply some denoising and adaptive threshold
     den = cv2.bilateralFilter(gray, 9, 75, 75)
     thr = cv2.adaptiveThreshold(den, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                 cv2.THRESH_BINARY, 11, 2)
 
-    # Run pytesseract in sparse config to get text with confidences
     custom_oem_psm = "--oem 3 --psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     data = pytesseract.image_to_data(thr, output_type=pytesseract.Output.DICT, config=custom_oem_psm)
     texts = []
@@ -63,7 +37,6 @@ def extract_plate_candidates(img):
         conf = int(data['conf'][i]) if data['conf'][i].isdigit() else -1
         if not txt:
             continue
-        # Normalize to uppercase, remove non-alnum
         norm = re.sub(r'[^A-Z0-9]', '', txt.upper())
         if len(norm) >= 4:
             texts.append((norm, conf))
@@ -73,10 +46,8 @@ def extract_plate_candidates(img):
 def pick_best_candidate(cands):
     if not cands:
         return None, 0.0
-    # prefer highest confidence, tie-breaker longest
     cands_sorted = sorted(cands, key=lambda x: (x[1], len(x[0])), reverse=True)
     best, conf = cands_sorted[0]
-    # Normalize confidence to 0..1 (tesseract conf uses 0..100)
     conf_f = (conf / 100.0) if conf >= 0 else 0.0
     return best, conf_f
 
@@ -128,7 +99,6 @@ def run_loop(rtsp, camera_id, api_url, token, interval):
                 cap = cv2.VideoCapture(rtsp)
                 continue
             frame_count += 1
-            # Process one frame every N seconds (interval)
             now = time.time()
             if now - last_post < interval:
                 time.sleep(0.01)
@@ -138,7 +108,6 @@ def run_loop(rtsp, camera_id, api_url, token, interval):
             cands = extract_plate_candidates(frame)
             best, conf = pick_best_candidate(cands)
             if best and conf > 0.0:
-                # Basic filtering: require some confidence
                 post_event(api_url, token, camera_id, best, conf)
             else:
                 logger.debug('No candidate detected in frame %d', frame_count)

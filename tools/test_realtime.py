@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""Test realtime pipeline: login, post events, listen on websocket.
-
-Usage:
-  python tools/test_realtime.py --api-url http://127.0.0.1:8000 --username admin --password Admin@12345
-
-The script will:
- - log in and obtain a token
- - pick the first camera if no --camera-id provided
- - POST three events (exact match, near-miss, low-confidence)
- - connect to the WS `/ws/dashboard?token=...` and print messages for 10s
-"""
 import argparse
 import asyncio
 import json
@@ -91,16 +80,15 @@ def main():
     print('Using camera id:', cam)
 
     tests = [
-        ('GJ01XX0001', 0.92),  # exact/high-conf
-        ('GJ0IXX0001', 0.92),  # near-miss high-conf
-        ('GJ01XX0001', 0.60),  # low-conf should not alert
+        ('GJ01XX0001', 0.92),
+        ('GJ0IXX0001', 0.92),
+        ('GJ01XX0001', 0.60),
     ]
 
     for ident, conf in tests:
         code, text = post_event(args.api_url, token, cam, ident, conf)
         print('Posted', ident, '->', code)
 
-    # listen for WS messages
     asyncio.run(listen_ws(args.api_url, token, duration=12))
 
 

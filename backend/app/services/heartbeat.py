@@ -1,17 +1,3 @@
-"""
-Documented simulated heartbeat thresholding.
-
-Real cameras/edge-gateways would push heartbeats to POST
-/api/v1/cameras/{camera_id}/heartbeat on a fixed interval (e.g. every 15s).
-This background task periodically demotes cameras whose last_heartbeat is
-older than the configured thresholds to 'degraded' or 'offline', and
-broadcasts the change over WebSocket so dashboards update without a refresh.
-
-To replace the simulator with a real heartbeat service: point the actual
-camera/edge-gateway health probe at the heartbeat endpoint (with a
-service-to-service credential) instead of relying on this thresholding pass
-to only ever move cameras toward 'offline'.
-"""
 import asyncio
 from datetime import datetime, timedelta
 

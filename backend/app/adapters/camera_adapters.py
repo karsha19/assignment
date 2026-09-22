@@ -1,15 +1,4 @@
-"""
-Camera source adapter abstraction.
 
-Every adapter exposes the same interface (source identification, connection
-status, stream metadata, playback/stream reference, health information)
-regardless of the underlying transport. Today only RecordedVideoAdapter and
-SimulatedCameraAdapter are functional. RTSPAdapter, ONVIFAdapter and
-VendorAPIAdapter are documented stubs that define the contract a future
-implementation must fulfil -- they intentionally raise NotImplementedError
-so the system never silently pretends to have a live connection it does not
-have.
-"""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
@@ -34,13 +23,10 @@ class CameraSourceAdapter(ABC):
 
     @abstractmethod
     def check_health(self) -> bool:
-        """Returns True if the source is currently considered reachable."""
         ...
 
 
 class RecordedVideoAdapter(CameraSourceAdapter):
-    """Serves a pre-recorded MP4 file as the camera's 'feed'. This is NOT a
-    live stream and the UI must label it as recorded footage."""
 
     def get_stream_info(self) -> StreamInfo:
         return StreamInfo(
@@ -55,8 +41,6 @@ class RecordedVideoAdapter(CameraSourceAdapter):
 
 
 class SimulatedCameraAdapter(CameraSourceAdapter):
-    """Represents a camera with no real video, used purely to demonstrate
-    registry/health/analytics workflows without a video file."""
 
     def get_stream_info(self) -> StreamInfo:
         return StreamInfo(
@@ -71,9 +55,6 @@ class SimulatedCameraAdapter(CameraSourceAdapter):
 
 
 class RTSPAdapter(CameraSourceAdapter):
-    """Future integration point. A production implementation would open an
-    RTSP session (e.g. via GStreamer/ffmpeg) and relay to WebRTC/HLS for
-    browser playback."""
 
     def get_stream_info(self) -> StreamInfo:
         raise NotImplementedError("RTSP integration is not implemented in this prototype")
@@ -83,7 +64,6 @@ class RTSPAdapter(CameraSourceAdapter):
 
 
 class ONVIFAdapter(CameraSourceAdapter):
-    """Future integration point for ONVIF discovery/profile negotiation."""
 
     def get_stream_info(self) -> StreamInfo:
         raise NotImplementedError("ONVIF integration is not implemented in this prototype")
@@ -93,7 +73,6 @@ class ONVIFAdapter(CameraSourceAdapter):
 
 
 class VendorAPIAdapter(CameraSourceAdapter):
-    """Future integration point for vendor-specific SDK/API-based cameras."""
 
     def get_stream_info(self) -> StreamInfo:
         raise NotImplementedError("Vendor API integration is not implemented in this prototype")
