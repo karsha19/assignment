@@ -23,9 +23,29 @@ export default function DashboardPage() {
         api.get('/api/v1/alerts', { params: { limit: 50 } }),
         api.get('/api/v1/analytics/events', { params: { limit: 30 } }),
       ])
+      const nextAlerts = alertsRes.data || []
+      const nextEvents = eventsRes.data || []
+
       setCameras(camerasRes.data)
-      setAlerts(alertsRes.data)
-      setEvents(eventsRes.data)
+      setAlerts(nextAlerts)
+      setEvents(nextEvents)
+
+      const seededActivity = [
+        ...nextAlerts.slice(0, 8).map((alert) => ({
+          id: `alert-${alert.id}`,
+          ts: new Date(alert.detection_timestamp || alert.created_at || Date.now()),
+          line: `Alert ${alert.severity} for ${alert.matched_identifier}`,
+        })),
+        ...nextEvents.slice(0, 8).map((event) => ({
+          id: `event-${event.id}`,
+          ts: new Date(event.event_timestamp || event.created_at || Date.now()),
+          line: `Detection: ${event.entity_identifier || event.event_type} on camera ${event.camera_id}`,
+        })),
+      ]
+        .sort((a, b) => b.ts - a.ts)
+        .slice(0, 30)
+
+      setActivity(seededActivity)
     } finally {
       setLoading(false)
     }

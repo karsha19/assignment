@@ -42,8 +42,14 @@ def get_or_create_camera(code, **kwargs):
         stream_reference = kwargs.get("stream_reference")
         if stream_reference and cam.stream_reference != stream_reference:
             cam.stream_reference = stream_reference
-            db.commit()
-            db.refresh(cam)
+        if "is_enabled" in kwargs:
+            cam.is_enabled = bool(kwargs["is_enabled"])
+        if "status" in kwargs:
+            cam.status = kwargs["status"]
+        if "last_heartbeat" in kwargs:
+            cam.last_heartbeat = kwargs["last_heartbeat"]
+        db.commit()
+        db.refresh(cam)
         return cam
     cam = m.Camera(camera_code=code, **kwargs)
     db.add(cam)
@@ -67,6 +73,7 @@ def main():
         source_protocol=m.SourceProtocolEnum.recorded,
         stream_reference="/media/sample/VIRAT_S_010204_05_000856_000890.mp4",
         status=m.CameraStatusEnum.online,
+        is_enabled=True,
         last_heartbeat=datetime.utcnow(),
         storage_metadata={"retention_days": 30},
     )
@@ -81,6 +88,7 @@ def main():
         source_protocol=m.SourceProtocolEnum.recorded,
         stream_reference="/media/sample/VIRAT_S_050201_05_000890_000944.mp4",
         status=m.CameraStatusEnum.online,
+        is_enabled=True,
         last_heartbeat=datetime.utcnow(),
         storage_metadata={"retention_days": 30},
     )

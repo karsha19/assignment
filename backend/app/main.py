@@ -34,13 +34,20 @@ async def lifespan(app: FastAPI):
             user_count = db.query(User).count()
         except Exception:
             user_count = 0
-        if user_count == 0 and seeder is not None:
-            if settings.ENV != "production" or os.getenv("SEED_ON_STARTUP", "") == "1":
+        if seeder is not None and (settings.ENV != "production" or os.getenv("SEED_ON_STARTUP", "") == "1"):
+            if user_count == 0:
                 logger.info("No users found in DB; running demo seeder to create admin/operator accounts")
                 try:
                     seeder.main()
                 except Exception:
                     logger.exception("Seeder run failed")
+            else:
+                from app.models.models import Camera, CameraStatusEnum
+                for cam in db.query(Camera).all():
+                    if cam.camera_code in {"C001", "C002"} and not cam.is_enabled:
+                        cam.is_enabled = True
+                        cam.status = CameraStatusEnum.online
+                db.commit()
     finally:
         db.close()
 
